@@ -4,7 +4,7 @@ Release:        1%{?dist}
 Summary:        A syntax-highlighting pager for git, diff, and grep output
 URL:            https://github.com/dandavison/delta
 License:        MIT
-Source0:        https://github.com/dandavison/delta/archive/refs/tags/v%{version}.tar.gz
+Source0:        https://github.com/dandavison/delta/archive/refs/tags/%{version}.tar.gz
 
 # BuildRequires: List all packages required to build the software
 BuildRequires:  git
