@@ -1,6 +1,6 @@
 Name:           delta
 Version:        0.18.1
-1Release:       1%{?dist}
+Release:        1%{?dist}
 Summary:        A syntax-highlighting pager for git, diff, and grep output
 URL:            https://github.com/dandavison/delta
 License:        MIT
