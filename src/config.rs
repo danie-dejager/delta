@@ -53,6 +53,7 @@ pub struct Config {
     pub cwd_relative_to_repo_root: Option<String>,
     pub decorations_width: cli::Width,
     pub default_language: String,
+    pub diff_args: String,
     pub diff_stat_align_width: usize,
     pub error_exit_code: i32,
     pub file_added_label: String,
@@ -101,6 +102,7 @@ pub struct Config {
     pub max_line_distance_for_naively_paired_lines: f64,
     pub max_line_distance: f64,
     pub max_line_length: usize,
+    pub max_syntax_length: usize,
     pub merge_conflict_begin_symbol: String,
     pub merge_conflict_ours_diff_header_style: Style,
     pub merge_conflict_theirs_diff_header_style: Style,
@@ -297,6 +299,7 @@ impl From<cli::Opt> for Config {
             cwd_relative_to_repo_root,
             decorations_width: opt.computed.decorations_width,
             default_language: opt.default_language,
+            diff_args: opt.diff_args,
             diff_stat_align_width: opt.diff_stat_align_width,
             error_exit_code: 2, // Use 2 for error because diff uses 0 and 1 for non-error.
             file_added_label,
@@ -392,6 +395,7 @@ impl From<cli::Opt> for Config {
             } else {
                 opt.max_line_length
             },
+            max_syntax_length: opt.max_syntax_length,
             merge_conflict_begin_symbol: opt.merge_conflict_begin_symbol,
             merge_conflict_ours_diff_header_style: styles["merge-conflict-ours-diff-header-style"],
             merge_conflict_theirs_diff_header_style: styles
