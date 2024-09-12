@@ -11,6 +11,7 @@ use syntect::highlighting::Theme as SyntaxTheme;
 use syntect::parsing::SyntaxSet;
 
 use crate::ansi::{ANSI_SGR_BOLD, ANSI_SGR_RESET, ANSI_SGR_UNDERLINE};
+use crate::color::ColorMode;
 use crate::config::delta_unreachable;
 use crate::env::DeltaEnv;
 use crate::git_config::GitConfig;
@@ -411,9 +412,9 @@ pub struct Opt {
     /// and line numbers link to the local file using a file URL, whereas commit hashes link to the
     /// commit in GitHub, if the remote repository is hosted by GitHub. See
     /// --hyperlinks-file-link-format for full control over the file URLs emitted. Hyperlinks are
-    /// supported by several common terminal emulators. To make them work, you must use less version
-    /// >= 581 with the -R flag (or use -r with older less versions, but this will break e.g.
-    /// --navigate). If you use tmux, then you will also need a patched fork of tmux (see
+    /// supported by several common terminal emulators. To make them work, you must use less
+    /// version >= 581 with the -R flag (or use -r with older less versions, but this will break
+    /// e.g. --navigate). If you use tmux, then you will also need a patched fork of tmux (see
     /// <https://github.com/dandavison/tmux>).
     pub hyperlinks: bool,
 
@@ -1180,7 +1181,7 @@ pub struct ComputedValues {
     pub background_color_extends_to_terminal_width: bool,
     pub decorations_width: Width,
     pub inspect_raw_lines: InspectRawLines,
-    pub is_light_mode: bool,
+    pub color_mode: ColorMode,
     pub paging_mode: PagingMode,
     pub syntax_set: SyntaxSet,
     pub syntax_theme: Option<SyntaxTheme>,
