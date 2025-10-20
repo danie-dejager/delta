@@ -46,6 +46,7 @@ $HOME/.cargo/bin/cargo test --release
 /usr/bin/%{name}
 
 %changelog
+* Mon Oct 20 2025 - Danie de Jager - 0.18.2-5
 * Mon Jun 16 2025 - Danie de Jager - 0.18.2-4
 * Tue Feb 4 2025 - Danie de Jager - 0.18.2-3
 * Thu Nov 14 2024 - Danie de Jager - 0.18.2-2
