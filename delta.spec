@@ -14,6 +14,7 @@ BuildRequires:  gcc
 BuildRequires:  upx
 
 %define debug_package %{nil}
+%undefine _package_note_file
 
 %description
 Code evolves, and we all spend time studying diffs. Delta aims to make this both efficient and enjoyable:
