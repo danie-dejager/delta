@@ -2,6 +2,7 @@ mod remote;
 
 pub use remote::GitRemoteRepo;
 
+use crate::cli;
 use crate::env::DeltaEnv;
 use regex::Regex;
 use std::cell::OnceCell;
@@ -37,19 +38,23 @@ impl Clone for GitConfig {
     }
 }
 
+/// The repository at or above `dir`, and the git config delta reads there: the repository's, or
+/// outside a repository the user's and the system's.
+pub fn open(dir: Option<&std::path::Path>) -> (Option<git2::Repository>, Option<git2::Config>) {
+    let repo = dir.and_then(|dir| git2::Repository::discover(dir).ok());
+    let config = match &repo {
+        Some(repo) => repo.config().ok(),
+        None => git2::Config::open_default().ok(),
+    };
+    (repo, config)
+}
+
 impl GitConfig {
     #[cfg(not(test))]
     pub fn try_create(env: &DeltaEnv) -> Option<Self> {
         use crate::fatal;
 
-        let repo = match &env.current_dir {
-            Some(dir) => git2::Repository::discover(dir).ok(),
-            _ => None,
-        };
-        let config = match &repo {
-            Some(repo) => repo.config().ok(),
-            None => git2::Config::open_default().ok(),
-        };
+        let (repo, config) = open(env.current_dir.as_deref());
         match config {
             Some(mut config) => {
                 let config = config.snapshot().unwrap_or_else(|err| {
@@ -235,6 +240,20 @@ impl GitConfigGet for bool {
             Some("true") => Some(true),
             Some("false") => Some(false),
             _ => git_config.config.get_bool(key).ok(),
+        }
+    }
+}
+
+impl GitConfigGet for cli::SideBySide {
+    fn git_config_get(key: &str, git_config: &GitConfig) -> Option<Self> {
+        if let Some(Ok(value)) = git_config.config_from_env_var.get(key).map(|s| s.parse()) {
+            return Some(value);
+        }
+        let entry = git_config.config.get_entry(key).ok()?;
+        if entry.has_value() {
+            entry.value()?.parse().ok()
+        } else {
+            Some(Self::On(cli::SideBySideScope::All))
         }
     }
 }

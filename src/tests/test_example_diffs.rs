@@ -139,6 +139,27 @@ mod tests {
     }
 
     #[test]
+    fn test_removed_file_is_syntax_highlighted() {
+        // The plus file is /dev/null, so the language must come from the minus file.
+        // Use color-only so that we can refer to the line numbers from the input diff.
+        let config = integration_test_utils::make_config_from_args(&[
+            "--color-only",
+            "--minus-style",
+            "syntax",
+        ]);
+        let output = integration_test_utils::run_delta(REMOVED_RS_FILE, &config);
+        ansi_test_utils::assert_line_has_syntax_highlighted_substring(
+            &output,
+            6,
+            1,
+            "fn main() {}",
+            "main.rs",
+            State::HunkMinus(DiffType::Unified, None),
+            &config,
+        );
+    }
+
+    #[test]
     fn test_full_filename_used_to_detect_language() {
         let config = integration_test_utils::make_config_from_args(&[
             "--color-only",
@@ -258,6 +279,18 @@ index 0123456..1234567 100644
         let config = integration_test_utils::make_config_from_args(&[]);
         let output = integration_test_utils::run_delta(DIFF_WITH_MERGE_CONFLICT, &config);
         println!("{}", strip_ansi_codes(&output));
+    }
+
+    #[test]
+    fn test_diff_with_merge_conflict_is_side_by_side_under_side_by_side_hunk() {
+        // A combined diff hunk keeps the side-by-side layout.
+        let side_by_side = integration_test_utils::make_config_from_args(&["--side-by-side"]);
+        let side_by_side_hunk =
+            integration_test_utils::make_config_from_args(&["--side-by-side=hunk"]);
+        assert_eq!(
+            integration_test_utils::run_delta(DIFF_WITH_MERGE_CONFLICT, &side_by_side_hunk),
+            integration_test_utils::run_delta(DIFF_WITH_MERGE_CONFLICT, &side_by_side),
+        );
     }
 
     #[test]
@@ -998,6 +1031,7 @@ src/align.rs
             &["--color-only", "--dark"],
             &["--color-only", "--line-numbers"],
             &["--color-only", "--side-by-side"],
+            &["--color-only", "--side-by-side=hunk"],
             &["--color-only", "--diff-highlight"],
             &["--color-only", "--diff-so-fancy"],
             &["--color-only", "--navigate"],
@@ -2192,11 +2226,11 @@ src/align.rs:71: impl<'a> Alignment<'a> { │
         (blue)│(88)    (blue)│(231 52)(l(normal 52)eft, diag, up) =(normal 124) ((normal 52) (blue) │(28)    (blue)│(231 22)(l(normal 22)eft, diag, up) =(normal)
         (blue)│(88) 74 (blue)│(231 52)                    (blue)↵(blue) │(28) 74 (blue)│(231 22)                    (blue)↵(normal)
         (blue)│(88)    (blue)│(231 52)se(normal 52)lf.index(i, j + 1),(blue) │(28)    (blue)│(231 28)((normal 22)s(normal 22)elf.index(i, j + 1(reverse normal)→(normal)
-        (blue)│(88) 75 (blue)│(231 52)                    (blue)↵(blue) │(28)    (blue)│(normal)
-        (blue)│(88)    (blue)│(231 52)se(normal 52)lf.index(i, j),(normal 52)    (blue) │(28)    (blue)│(normal)
-        (blue)│(88) 76 (blue)│(231 52)                    (blue)↵(blue) │(28)    (blue)│(normal)
-        (blue)│(88)    (blue)│(231 52)se(normal 52)lf.index(i + 1, j),(blue) │(28)    (blue)│(normal)
-        (blue)│(88) 77 (blue)│(231 52)                );(normal 52)   (blue) │(28)    (blue)│(normal)
+        (blue)│(88) 75 (blue)│(231 52)                    (blue)↵(blue) │(238)    (blue)│(normal)
+        (blue)│(88)    (blue)│(231 52)se(normal 52)lf.index(i, j),(normal 52)    (blue) │(238)    (blue)│(normal)
+        (blue)│(88) 76 (blue)│(231 52)                    (blue)↵(blue) │(238)    (blue)│(normal)
+        (blue)│(88)    (blue)│(231 52)se(normal 52)lf.index(i + 1, j),(blue) │(238)    (blue)│(normal)
+        (blue)│(88) 77 (blue)│(231 52)                );(normal 52)   (blue) │(238)    (blue)│(normal)
         (blue)│(238) 78 (blue)│(231)                (81)let(231) (blue)↵(blue) │(238) 75 (blue)│(231)                (81)let(231) (blue)↵(normal)
         (blue)│(238)    (blue)│(231)ca(normal)ndidates = [       (blue) │(238)    (blue)│(231)ca(normal)ndidates = [
         (blue)│(238) 79 (blue)│(231)                    (blue)↵(blue) │(238) 76 (blue)│(231)                    (blue)↵(normal)
@@ -2526,6 +2560,16 @@ index 2e73468..8d8b89d 100644
  
              Console.WriteLine(message);
          }
+";
+
+    const REMOVED_RS_FILE: &str = "\
+diff --git a/main.rs b/main.rs
+deleted file mode 100644
+index 1111111..0000000
+--- a/main.rs
++++ /dev/null
+@@ -1 +0,0 @@
+-fn main() {}
 ";
 
     const MODIFIED_DOCKER_AND_RS_FILES: &str = "\

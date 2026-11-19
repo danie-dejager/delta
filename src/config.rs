@@ -12,6 +12,7 @@ use crate::cli;
 use crate::color::{self, ColorMode};
 use crate::delta::State;
 use crate::fatal;
+use crate::features::line_numbers;
 use crate::features::navigate;
 use crate::features::side_by_side::{self, ansifill, LeftRight};
 use crate::git_config::GitConfig;
@@ -96,6 +97,7 @@ pub struct Config {
     pub line_fill_method: BgFillMethod,
     pub line_numbers_format: LeftRight<String>,
     pub line_numbers_style_leftright: LeftRight<Style>,
+    pub line_numbers_style_leftright_is_line: LeftRight<bool>,
     pub line_numbers_style_minusplus: MinusPlus<Style>,
     pub line_numbers_zero_style: Style,
     pub line_numbers: bool,
@@ -128,11 +130,13 @@ pub struct Config {
     pub show_themes: bool,
     pub side_by_side_data: side_by_side::SideBySideData,
     pub side_by_side: bool,
+    pub side_by_side_scope: cli::SideBySideScope,
     pub syntax_set: SyntaxSet,
     pub syntax_theme: Option<SyntaxTheme>,
     pub tab_cfg: utils::tabs::TabCfg,
     pub tokenization_regex: Regex,
     pub true_color: bool,
+    pub unified_line_numbers_format: LeftRight<String>,
     pub truncation_symbol: String,
     pub whitespace_error_style: Style,
     pub wrap_config: WrapConfig,
@@ -382,6 +386,10 @@ impl From<cli::Opt> for Config {
                 styles["line-numbers-left-style"],
                 styles["line-numbers-right-style"],
             ),
+            line_numbers_style_leftright_is_line: LeftRight::new(
+                line_numbers::is_line_style(&opt.line_numbers_left_style),
+                line_numbers::is_line_style(&opt.line_numbers_right_style),
+            ),
             line_numbers_style_minusplus: MinusPlus::new(
                 styles["line-numbers-minus-style"],
                 styles["line-numbers-plus-style"],
@@ -390,7 +398,7 @@ impl From<cli::Opt> for Config {
             line_buffer_size: opt.line_buffer_size,
             max_line_distance: opt.max_line_distance,
             max_line_distance_for_naively_paired_lines,
-            max_line_length: if opt.side_by_side {
+            max_line_length: if opt.computed.side_by_side {
                 wrap_config.config_max_line_length(
                     opt.max_line_length,
                     opt.computed.available_terminal_width,
@@ -424,14 +432,19 @@ impl From<cli::Opt> for Config {
             git_plus_style: styles["git-plus-style"],
             relative_paths: opt.relative_paths,
             show_themes: opt.show_themes,
-            side_by_side: opt.side_by_side && !handlers::hunk::is_word_diff(),
+            side_by_side: opt.computed.side_by_side && !handlers::hunk::is_word_diff(),
             side_by_side_data,
+            side_by_side_scope: opt.computed.side_by_side_scope,
             styles_map,
             syntax_set: opt.computed.syntax_set,
             syntax_theme: opt.computed.syntax_theme,
             tab_cfg: utils::tabs::TabCfg::new(opt.tab_width),
             tokenization_regex,
             true_color: opt.computed.true_color,
+            unified_line_numbers_format: LeftRight::new(
+                opt.computed.unified_line_numbers_left_format,
+                opt.computed.unified_line_numbers_right_format,
+            ),
             truncation_symbol: format!("{}→{}", ansi::ANSI_SGR_REVERSE, ansi::ANSI_SGR_RESET),
             wrap_config,
             whitespace_error_style: styles["whitespace-error-style"],
