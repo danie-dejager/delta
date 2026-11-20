@@ -1,5 +1,5 @@
 Name:           delta
-Version:        0.21.1
+Version:        0.21.2
 Release:        1%{?dist}
 Summary:        A syntax-highlighting pager for git, diff, and grep output
 URL:            https://github.com/dandavison/delta
@@ -47,6 +47,7 @@ $HOME/.cargo/bin/cargo test --release
 /usr/bin/%{name}
 
 %changelog
+* Fri Nov 20 2026 - Danie de Jager - 0.21.2-1
 * Thu Nov 19 2026 - Danie de Jager - 0.21.1-1
 * Mon Oct 05 2026 - Danie de Jager - 0.20.1-1
 * Sun Oct 04 2026 - Danie de Jager - 0.20.0-1
